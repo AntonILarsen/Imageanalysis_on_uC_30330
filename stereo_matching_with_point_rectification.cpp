@@ -261,10 +261,10 @@ int main()
     Mat grayR = readImage(imgNameR);
 
     // Search through picture with ROI to find the position of best match in the image
-    int x_pos = 610; //0 - 1279 // 610
-    int y_pos = 550; //0 - 959 // 550
+    int ul = 610; //0 - 1279 // 610
+    int vl = 550; //0 - 959 // 550
     double x, y, z;
-    getDepth(x_pos, y_pos, grayL, grayR, x, y, z);
+    getDepth(ul, vl, grayL, grayR, x, y, z);
 
     waitKey(0);
     return 0;
