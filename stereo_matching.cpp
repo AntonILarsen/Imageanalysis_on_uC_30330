@@ -11,7 +11,7 @@ using namespace cv;
 
 Mat readImage(string imgName) {
     // Directory to file - turn \ to /
-    string dir = "C:/Users/marti/OneDrive - Danmarks Tekniske Universitet/DTU/Master/30330 Image Analysis MC/Imageanalysis_on_uC_30330/stereo_calib_v2/"; // "C : / Users / marti / Downloads / ";
+    string dir = "C:/Users/marti/OneDrive - Danmarks Tekniske Universitet/DTU/Master/30330 Image Analysis MC/"; // /test_pics/stereo_match_check/"; // "C : / Users / marti / Downloads / ";
 
     // Read image
     Mat image = imread(dir + imgName, IMREAD_GRAYSCALE);
@@ -41,8 +41,8 @@ double getDepth(int ul, int vl, Mat gray_l, Mat gray_r) { // måske integrer 50 s
     // baseline b:
     double b = 249.5049; // mm
     // focal length (fx,fy):
-    double fl = 1067.8832; // pixels
-    double fr = 1062.1669;
+    double fxl = M_int_left.at<double>(0, 0); // pixels
+    double fyl = M_int_left.at<double>(1, 1);
     // optical centers (cx,cy):
     double cxl = 628.7488; // pixels
     double cyl = 458.2156;
@@ -139,11 +139,11 @@ double getDepth(int ul, int vl, Mat gray_l, Mat gray_r) { // måske integrer 50 s
     }
 
     // Caluclate x, y, z and d (disparity):
-    double d = ul - ur; // ul - ur
-    double doff = cxr - cxl;
-    double z = b * fl / (d + doff);
-    double x = b * (ul - cxl) / (d + doff);
-    double y = b * fl * (vl - cyl) / (fl*(d + doff));
+    double d = ul_rec - ur_rec; // ul - ur
+    double doff = (cxl - cxr) / 2;
+    double z = b * fxl / (d + doff);
+    double x = (ul - cxl) * z / fxl;
+    double y = (vl - cyl) * z / fyl;
 
 
     // Draw a rectangle around the best matching region
@@ -219,17 +219,17 @@ void rectifyStereo(cv::InputArray grayL, cv::InputArray grayR, cv::OutputArray r
 int main()
 {
     // Image name, read and show:
-    string imgNameL = "Left/l3.png";
+    string imgNameL = "calib_pics_l/xl1.png";
     Mat grayL = readImage(imgNameL);
-    string imgNameR = "Right/r3.png";
+    string imgNameR = "calib_pics_r/xr1.png";
     Mat grayR = readImage(imgNameR);
 
     Mat rectL, rectR;
     rectifyStereo(grayL, grayR, rectL, rectR);
 
     // Search through picture with ROI to find the position of best match in the image
-    int x_pos = 490; //0 - 1279 // 490
-    int y_pos = 660; //0 - 959 // 660
+    int x_pos = 610; //0 - 1279 // 610
+    int y_pos = 550; //0 - 959 // 550
     double z = getDepth(x_pos, y_pos, rectL, rectR);
 
     waitKey(0);
