@@ -70,7 +70,7 @@ void rectifyPoints(const cv::Point2d& point_left, const cv::Point2d& point_right
 * @param grayR input image of the right camera
 * @return z output depth
 */
-double getDepth(int ul, int vl, Mat gray_l, Mat gray_r) { // måske integrer 50 som en parameter
+void getDepth(int ul, int vl, Mat gray_l, Mat gray_r, double& x, double& y, double& z) { // måske integrer 50 som en parameter
 
 
     // Camera intrinsic parameters (adjust these based on your camera setup)
@@ -223,9 +223,9 @@ double getDepth(int ul, int vl, Mat gray_l, Mat gray_r) { // måske integrer 50 s
     // Caluclate x, y, z and d (disparity):
     double d = ul_rec - ur_rec; // ul - ur
     double doff = (cxl - cxr) / 2;
-    double z = b * fxl / (d + doff);
-    double x = (ul - cxl) * z / fxl;
-    double y = (vl - cyl) * z / fyl;
+    z = b * fxl / (d + doff) / 1000; //mm -> m 
+    x = (ul - cxl) * z / fxl;
+    y = (vl - cyl) * z / fyl;
 
     // UNCOMMENT FROM HERE
     // Draw a rectangle around the best matching region
@@ -246,12 +246,10 @@ double getDepth(int ul, int vl, Mat gray_l, Mat gray_r) { // måske integrer 50 s
     cv::imshow("Matching Result - L and R", disp_img);
 
     cout << "\ndisparity " + std::to_string(d) + "\n";
-    cout << " x: " + std::to_string(x / 1000) + " y: " + std::to_string(y / 1000) + " z: " + std::to_string(z / 1000);
+    cout << " x: " + std::to_string(x) + " y: " + std::to_string(y) + " z: " + std::to_string(z);
     cout << "\nul: " + std::to_string(ul) + " vl: " + std::to_string(vl) + " ur: " + std::to_string(ur) + " vr: " + std::to_string(vr);
     cout << "\nul_rec: " + std::to_string(ul_rec) + " vl_rec: " + std::to_string(vl_rec) + " ur_rec: " + std::to_string(ur_rec) + " vr_rec: " + std::to_string(vr_rec);
     // TO HERE
-
-    return z;
 }
 
 int main()
@@ -265,9 +263,9 @@ int main()
     // Search through picture with ROI to find the position of best match in the image
     int x_pos = 610; //0 - 1279 // 610
     int y_pos = 550; //0 - 959 // 550
-    double z = getDepth(x_pos, y_pos, grayL, grayR);
+    double x, y, z;
+    getDepth(x_pos, y_pos, grayL, grayR, x, y, z);
 
     waitKey(0);
     return 0;
 }
-

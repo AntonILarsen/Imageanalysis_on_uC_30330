@@ -30,31 +30,33 @@ Mat readImage(string imgName) {
 * Returns the depth of a given point from the left image by searching in the right image
 *
 * @param ul input point column position
-* @param vl input point column position 
+* @param vl input point column position
 * @param grayL input image of the left camera
 * @param grayR input image of the right camera
-* @return z output depth
+* @param x output position x-coordinate
+* @param y output position y-coordinate
+* @param z output position z-coordinate
 */
-double getDepth(int ul, int vl, Mat gray_l, Mat gray_r) { // måske integrer 50 som en parameter
+void getDepth(int ul, int vl, Mat gray_l, Mat gray_r, double& x, double& y, double& z) { // måske integrer 50 som en parameter
 
     // Constants for camera parameters
     // baseline b:
-    double b = 249.5049; // mm
+    double b = 249.0464; // mm
     // focal length (fx,fy):
-    double fxl = M_int_left.at<double>(0, 0); // pixels
-    double fyl = M_int_left.at<double>(1, 1);
+    double fxl = 1083.6432; // pixels
+    double fyl = 1081.5531;
     // optical centers (cx,cy):
-    double cxl = 628.7488; // pixels
-    double cyl = 458.2156;
-    double cxr = 633.2999;
-    double cyr = 472.6714;
+    double cxl = 622.0939; // pixels
+    double cyl = 464.5388;
+    double cxr = 635.6450;
+    double cyr = 467.2909;
 
     // Handling boundary cases
     int window_size = 50;
     // Scan through a band in the right image on a horizontal line
     int band_height = 30;
     // Define the Mats outside of if-else conditions
-    Mat dst_l, window;  
+    Mat dst_l, window;
     int hori_start, vert_start_w, vert_start_b;
     if (ul < window_size / 2) {
         if (vl < window_size / 2) {
@@ -73,7 +75,7 @@ double getDepth(int ul, int vl, Mat gray_l, Mat gray_r) { // måske integrer 50 s
             dst_l = Mat(gray_l, Rect(ul, vl - window_size / 2, window_size, window_size));
             hori_start = 0;
             vert_start_w = window_size / 2;
-            vert_start_b = band_height/2;
+            vert_start_b = band_height / 2;
         }
     }
     else if (ul > gray_l.cols - 1 - window_size / 2) {
@@ -121,35 +123,36 @@ double getDepth(int ul, int vl, Mat gray_l, Mat gray_r) { // måske integrer 50 s
 
     // Variables to store the best matching region
     Rect best_patch;
-    int ur, best_m = INT_MAX;
+    int ur, vr, best_m = INT_MAX;
     // Search through band and horizontal line to the left only:
     for (int i = 0; i < band_height; i++) {
-         for (int col = hori_start; col <= ul; col++) { // col < gray_r.cols + hori_start - window_size
-             Mat dst_r(gray_r, Rect(col - hori_start, vl - vert_start_w - vert_start_b + i, window_size, window_size)); // x, y, width, height
-             // Sum of absolute differences (SAD):
-             int m = cv::sum(abs(window - dst_r.clone()))[0];
-             // Best match in scan gets saved
-             // Update the best matching region
-             if (col == hori_start || m < best_m) {
-                 ur = col;
-                 best_m = m;
-                 best_patch = Rect(col - hori_start, vl - vert_start_w - vert_start_b + i, window_size, window_size);
-             }
-         }
+        for (int col = hori_start; col <= ul; col++) { // col < gray_r.cols + hori_start - window_size
+            Mat dst_r(gray_r, Rect(col - hori_start, vl - vert_start_w - vert_start_b + i, window_size, window_size)); // x, y, width, height
+            // Sum of absolute differences (SAD):
+            int m = cv::sum(abs(window - dst_r.clone()))[0];
+            // Best match in scan gets saved
+            // Update the best matching region
+            if (col == hori_start || m < best_m) {
+                ur = col;
+                vr = vl + i - vert_start_b;
+                best_m = m;
+                best_patch = Rect(col - hori_start, vl - vert_start_w - vert_start_b + i, window_size, window_size);
+            }
+        }
     }
 
     // Caluclate x, y, z and d (disparity):
-    double d = ul_rec - ur_rec; // ul - ur
+    double d = ul - ur; // ul - ur
     double doff = (cxl - cxr) / 2;
-    double z = b * fxl / (d + doff);
-    double x = (ul - cxl) * z / fxl;
-    double y = (vl - cyl) * z / fyl;
+    z = b * fxl / (d + doff);
+    x = (ul - cxl) * z / fxl;
+    y = (vl - cyl) * z / fyl;
 
 
     // Draw a rectangle around the best matching region
     rectangle(gray_r, best_patch, Scalar(255), 2);
     // Draw a rectangle around the region in the left image that corresponds to the matching region in the right image
-    Rect draw_l(ul - hori_start, vl - window_size/2, best_patch.width, best_patch.height); // NOT ALL ENDPOINTS
+    Rect draw_l(ul - hori_start, vl - window_size / 2, best_patch.width, best_patch.height); // NOT ALL ENDPOINTS
     rectangle(gray_l, draw_l, Scalar(255), 2);
 
     // Display both the left and right images with matching regions highlighted
@@ -164,38 +167,38 @@ double getDepth(int ul, int vl, Mat gray_l, Mat gray_r) { // måske integrer 50 s
     cv::imshow("Matching Result - L and R", disp_img);
 
     cout << "\ndisparity " + std::to_string(d) + "\n";
-    cout << " x: " + std::to_string(x/1000) + " y: " + std::to_string(y / 1000) + " z: " + std::to_string(z / 1000);
+    cout << " x: " + std::to_string(x / 1000) + " y: " + std::to_string(y / 1000) + " z: " + std::to_string(z / 1000);
+    cout << "\nul: " + std::to_string(ul) + " vl: " + std::to_string(vl) + " ur: " + std::to_string(ur) + " vr: " + std::to_string(vr);
 
-    return z;
 }
 
 void rectifyStereo(cv::InputArray grayL, cv::InputArray grayR, cv::OutputArray rectL, cv::OutputArray rectR) {
     // Camera intrinsic parameters (adjust these based on your camera setup)
     //Mat K1, K2;       // Camera calibration matrices -> camera matrix = [fx 0 0]^T , [0 fy 0]^T , [cx cy 1]^T]
-    
+
     // Camera 1 Intrinsics
     cv::Mat cameraMatrix1 = (cv::Mat_<double>(3, 3) <<
-        1067.8832, 0, 628.7488,
-        0, 1068.7313, 458.2156,
+        1083.6432, 0, 622.0939,
+        0, 1081.5531, 464.5388,
         0, 0, 1
-        );
-    cv::Mat distCoeffs1 = (cv::Mat_<double>(5, 1) << -0.3957, 0.1887, 0, 0, 0);
+        ); // pixels
+    cv::Mat distCoeffs1 = (cv::Mat_<double>(5, 1) << -0.3936, 0.1667, 0, 0, 0);
 
     // Camera 2 Intrinsics
     cv::Mat cameraMatrix2 = (cv::Mat_<double>(3, 3) <<
-        1062.1669, 0, 633.2999,
-        0, 1062.9841, 472.6714,
+        1169.0548, 0, 635.6450,
+        0, 1165.6900, 467.2909,
         0, 0, 1
-        );
-    cv::Mat distCoeffs2 = (cv::Mat_<double>(5, 1) << -0.3879, 0.1684, 0, 0, 0);
+        ); // pixels
+    cv::Mat distCoeffs2 = (cv::Mat_<double>(5, 1) << -0.4002, 0.1880, 0, 0, 0);
 
     // Position And Orientation of Camera 2 Relative to Camera 1
     cv::Mat R = (cv::Mat_<double>(3, 3) <<
-        0.9999, -0.0098, 0.0094,
-        0.0099, 0.9999, -0.0055,
-        -0.0094, 0.0056, 0.9999
+        0.999953, -0.0094, 0.0033,
+        0, 1.0000, 0.0000,
+        -0.0033, -0.0094, 0.999953
         );
-    cv::Mat T = (cv::Mat_<double>(3, 1) << -249.5049, -0.2973, 0.4982);
+    cv::Mat T = (cv::Mat_<double>(3, 1) << -249.0464, -0.5551, 0.9119); // mm
 
     // Compute rectification matrices for the stereo pair
     cv::Mat R1, R2, P1, P2, Q;
@@ -213,7 +216,7 @@ void rectifyStereo(cv::InputArray grayL, cv::InputArray grayR, cv::OutputArray r
     // Apply rectification to the images
     cv::remap(grayL, rectL, map1x, map1y, cv::INTER_LINEAR);
     cv::remap(grayR, rectR, map2x, map2y, cv::INTER_LINEAR);
-    
+
 }
 
 int main()
@@ -228,10 +231,15 @@ int main()
     rectifyStereo(grayL, grayR, rectL, rectR);
 
     // Search through picture with ROI to find the position of best match in the image
-    int x_pos = 610; //0 - 1279 // 610
-    int y_pos = 550; //0 - 959 // 550
-    double z = getDepth(x_pos, y_pos, rectL, rectR);
+    int ul = 590; //0 - 1279 // 610
+    int vl = 548; //0 - 959 // 550
+    double x, y, z;
+    getDepth(ul, vl, rectL, rectR, x, y, z);
 
     waitKey(0);
     return 0;
 }
+
+
+
+
