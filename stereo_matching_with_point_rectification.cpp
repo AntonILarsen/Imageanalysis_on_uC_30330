@@ -1,3 +1,5 @@
+
+
 // Stereo matching by rectification
 // Martin Schaarup, IA on MC, 11.10.2023
 #include <iostream>
@@ -12,7 +14,7 @@ using namespace cv;
 
 Mat readImage(string imgName) {
     // Directory to file - turn \ to /
-    string dir = "C:/Users/marti/OneDrive - Danmarks Tekniske Universitet/DTU/Master/30330 Image Analysis MC/Imageanalysis_on_uC_30330/stereo_calib_v2/"; // "C : / Users / marti / Downloads / ";
+    string dir = "C:/Users/marti/OneDrive - Danmarks Tekniske Universitet/DTU/Master/30330 Image Analysis MC/"; // /test_pics/stereo_match_check/"; // "C : / Users / marti / Downloads / ";
 
     // Read image
     Mat image = imread(dir + imgName, IMREAD_GRAYSCALE);
@@ -76,27 +78,27 @@ double getDepth(int ul, int vl, Mat gray_l, Mat gray_r) { // måske integrer 50 s
 
 // Camera 1 Intrinsics
     cv::Mat M_int_left = (cv::Mat_<double>(3, 3) <<
-        1067.8832, 0, 628.7488,
-        0, 1068.7313, 458.2156,
+        1083.6432, 0, 622.0939,
+        0, 1081.5531, 464.5388,
         0, 0, 1
         ); // pixels
-    cv::Mat distCoeffs1 = (cv::Mat_<double>(5, 1) << -0.3957, 0.1887, 0, 0, 0);
+    cv::Mat distCoeffs1 = (cv::Mat_<double>(5, 1) << -0.3936, 0.1667, 0, 0, 0);
 
     // Camera 2 Intrinsics
     cv::Mat M_int_right = (cv::Mat_<double>(3, 3) <<
-        1062.1669, 0, 633.2999,
-        0, 1062.9841, 472.6714,
+        1169.0548, 0, 635.6450,
+        0, 1165.6900, 467.2909,
         0, 0, 1
         ); // pixels
-    cv::Mat distCoeffs2 = (cv::Mat_<double>(5, 1) << -0.3879, 0.1684, 0, 0, 0);
+    cv::Mat distCoeffs2 = (cv::Mat_<double>(5, 1) << -0.4002, 0.1880, 0, 0, 0);
 
     // Position And Orientation of Camera 2 Relative to Camera 1
     cv::Mat R = (cv::Mat_<double>(3, 3) <<
-        0.9999, -0.0098, 0.0094,
-        0.0099, 0.9999, -0.0055,
-        -0.0094, 0.0056, 0.9999
+        0.999953, -0.0094, 0.0033,
+        0, 1.0000, 0.0000,
+        -0.0033, -0.0094, 0.999953
         );
-    cv::Mat T = (cv::Mat_<double>(3, 1) << -249.5049, -0.2973, 0.4982); // mm
+    cv::Mat T = (cv::Mat_<double>(3, 1) << -249.0464, -0.5551, 0.9119); // mm
 
 
 
@@ -105,13 +107,13 @@ double getDepth(int ul, int vl, Mat gray_l, Mat gray_r) { // måske integrer 50 s
     // baseline b:
     double b = -T.at<double>(0); // mm
     // focal length (fx,fy):
-    double fl = M_int_left.at<double>(0,0); // pixels
-    double fr = M_int_right.at<double>(0,0);
+    double fxl = M_int_left.at<double>(0, 0); // pixels
+    double fyl = M_int_left.at<double>(1, 1);
     // optical centers (cx,cy):
-    double cxl = M_int_left.at<double>(0,2); // pixels
-    double cyl = M_int_left.at<double>(1,2);
-    double cxr = M_int_right.at<double>(0,2);
-    double cyr = M_int_right.at<double>(1,2);
+    double cxl = M_int_left.at<double>(0, 2); // pixels
+    double cyl = M_int_left.at<double>(1, 2);
+    double cxr = M_int_right.at<double>(0, 2);
+    double cyr = M_int_right.at<double>(1, 2);
 
     // Handling boundary cases
     int window_size = 50;
@@ -216,13 +218,14 @@ double getDepth(int ul, int vl, Mat gray_l, Mat gray_r) { // måske integrer 50 s
     int vl_rec = point_rect_left.y;
     int ur_rec = point_rect_right.x;
     int vr_rec = point_rect_right.y;
+    cout << "\n HEJ: " + to_string(ul_rec) + to_string(vl_rec) + to_string(ur_rec) + to_string(vr_rec) + " \n\n\n";
 
     // Caluclate x, y, z and d (disparity):
     double d = ul_rec - ur_rec; // ul - ur
-    double doff = cxr - cxl;
-    double z = b * fl / (d + doff);
-    double x = b * (ul_rec - cxl) / (d + doff);
-    double y = b * fl * (vl_rec - cyl) / (fl * (d + doff));
+    double doff = (cxl - cxr) / 2;
+    double z = b * fxl / (d + doff);
+    double x = (ul - cxl) * z / fxl;
+    double y = (vl - cyl) * z / fyl;
 
     // UNCOMMENT FROM HERE
     // Draw a rectangle around the best matching region
@@ -245,6 +248,7 @@ double getDepth(int ul, int vl, Mat gray_l, Mat gray_r) { // måske integrer 50 s
     cout << "\ndisparity " + std::to_string(d) + "\n";
     cout << " x: " + std::to_string(x / 1000) + " y: " + std::to_string(y / 1000) + " z: " + std::to_string(z / 1000);
     cout << "\nul: " + std::to_string(ul) + " vl: " + std::to_string(vl) + " ur: " + std::to_string(ur) + " vr: " + std::to_string(vr);
+    cout << "\nul_rec: " + std::to_string(ul_rec) + " vl_rec: " + std::to_string(vl_rec) + " ur_rec: " + std::to_string(ur_rec) + " vr_rec: " + std::to_string(vr_rec);
     // TO HERE
 
     return z;
@@ -253,16 +257,17 @@ double getDepth(int ul, int vl, Mat gray_l, Mat gray_r) { // måske integrer 50 s
 int main()
 {
     // Image name, read and show:
-    string imgNameL = "Left/l3.png";
+    string imgNameL = "calib_pics_l/xl1.png";
     Mat grayL = readImage(imgNameL);
-    string imgNameR = "Right/r3.png";
+    string imgNameR = "calib_pics_r/xr1.png";
     Mat grayR = readImage(imgNameR);
 
     // Search through picture with ROI to find the position of best match in the image
-    int x_pos = 1200; //0 - 1279 // 490
-    int y_pos = 500; //0 - 959 // 660
+    int x_pos = 610; //0 - 1279 // 610
+    int y_pos = 550; //0 - 959 // 550
     double z = getDepth(x_pos, y_pos, grayL, grayR);
 
     waitKey(0);
     return 0;
 }
+
