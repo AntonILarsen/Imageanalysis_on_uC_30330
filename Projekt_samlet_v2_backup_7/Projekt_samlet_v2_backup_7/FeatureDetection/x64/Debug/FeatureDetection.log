@@ -1,0 +1,44 @@
+﻿  mainEx1.cpp
+C:\Users\Willi\source\repos\Projekt_samlet_v2_backup_4\FeatureDetection.h(22,23): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+C:\Users\Willi\source\repos\Projekt_samlet_v2_backup_4\FeatureDetection.h(23,23): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+C:\Users\Willi\source\repos\Projekt_samlet_v2_backup_4\mainEx1.cpp(82,16): warning C4244: '=': conversion from 'double' to '_Tp', possible loss of data
+          with
+          [
+              _Tp=uchar
+          ]
+C:\Users\Willi\source\repos\Projekt_samlet_v2_backup_4\mainEx1.cpp(84,16): warning C4244: '=': conversion from 'double' to '_Tp', possible loss of data
+          with
+          [
+              _Tp=uchar
+          ]
+C:\Users\Willi\source\repos\Projekt_samlet_v2_backup_4\mainEx1.cpp(384,34): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\Willi\source\repos\Projekt_samlet_v2_backup_4\mainEx1.cpp(384,59): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\Willi\source\repos\Projekt_samlet_v2_backup_4\mainEx1.cpp(470,94): warning C4244: 'argument': conversion from 'double' to '_Tp', possible loss of data
+          with
+          [
+              _Tp=int
+          ]
+C:\Users\Willi\source\repos\Projekt_samlet_v2_backup_4\mainEx1.cpp(476,16): warning C4244: 'initializing': conversion from '_Tp' to 'int', possible loss of data
+          with
+          [
+              _Tp=double
+          ]
+C:\Users\Willi\source\repos\Projekt_samlet_v2_backup_4\mainEx1.cpp(445,2): warning C4102: 'cv': unreferenced label
+C:\Users\Willi\source\repos\Projekt_samlet_v2_backup_4\mainEx1.cpp(531,99): warning C4244: 'argument': conversion from 'double' to '_Tp', possible loss of data
+          with
+          [
+              _Tp=int
+          ]
+C:\Users\Willi\source\repos\Projekt_samlet_v2_backup_4\mainEx1.cpp(537,16): warning C4244: 'initializing': conversion from '_Tp' to 'int', possible loss of data
+          with
+          [
+              _Tp=double
+          ]
+C:\Users\Willi\source\repos\Projekt_samlet_v2_backup_4\mainEx1.cpp(506,2): warning C4102: 'cv': unreferenced label
+C:\Users\Willi\source\repos\Projekt_samlet_v2_backup_4\mainEx1.cpp(790,10): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+C:\Users\Willi\source\repos\Projekt_samlet_v2_backup_4\mainEx1.cpp(791,10): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+C:\Users\Willi\source\repos\Projekt_samlet_v2_backup_4\mainEx1.cpp(796,10): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+C:\Users\Willi\source\repos\Projekt_samlet_v2_backup_4\mainEx1.cpp(797,10): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+C:\Users\Willi\source\repos\Projekt_samlet_v2_backup_4\mainEx1.cpp(802,10): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+C:\Users\Willi\source\repos\Projekt_samlet_v2_backup_4\mainEx1.cpp(803,10): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+  FeatureDetection.vcxproj -> C:\Users\Willi\source\repos\Projekt_samlet_v2_backup_4\x64\Debug\FeatureDetection.exe
